@@ -1,0 +1,47 @@
+
+<!-- confirmation.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Message Sent</title>
+    <style>
+        body {
+            background: linear-gradient(to right, #11998e, #38ef7d);
+            font-family: Arial, sans-serif;
+            text-align: center;
+            color: white;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        a {
+            padding: 10px 20px;
+            background: white;
+            color: #11998e;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 20px;
+            transition: 0.3s;
+        }
+        a:hover {
+            background: #38ef7d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Message Sent Successfully!</h1>
+        <p>Your message: {{ message }}</p>
+        <a href="/">Go Back Home</a>
+    </div>
+</body>
+</html>
