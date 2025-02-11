@@ -1,30 +1,79 @@
-import socket
+from flask import Flask, render_template, request, redirect, jsonify
+import os
+import csv
+import sqlite3
 
-# Server Configuration
-HOST = '0.0.0.0'  # Listen on all available network interfaces
-PORT = 12345       # Choose any available port
+app = Flask(__name__)
 
-# Create a socket object
-server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_socket.bind((HOST, PORT))
-server_socket.listen()
+# Ensure data.csv exists
+DATA_FILE = "data.csv"
+if not os.path.exists(DATA_FILE):
+    with open(DATA_FILE, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['method', 'endpoint'])
 
-print(f"Server listening on {HOST}:{PORT}")
+# Initialize SQLite database
+DATABASE = 'messages.db'
 
-while True:
-    client_socket, client_address = server_socket.accept()
-    print(f"New client connected from {client_address}")
+def init_db():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            message TEXT NOT NULL
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+init_db()
+
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/send_message', methods=['GET', 'POST'])
+def send_message():
+    if request.method == 'POST':
+        username = request.form['username']
+        message = request.form['message']
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        cursor.execute('INSERT INTO messages (username, message) VALUES (?, ?)', (username, message))
+        conn.commit()
+        conn.close()
+        
+        # Log POST request to data.csv
+        with open(DATA_FILE, 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['POST', '/send_message'])
+        
+        return redirect('/send_message')
     
-    # Send welcome message to client
-    welcome_message = "Welcome to the server!"
-    client_socket.sendall(welcome_message.encode())
+    # Log GET request to data.csv
+    with open(DATA_FILE, 'a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['GET', '/send_message'])
     
-    # Extra Credit: Send message.txt file
-    try:
-        with open("message.txt", "r") as file:
-            file_content = file.read()
-            client_socket.sendall(file_content.encode())
-    except FileNotFoundError:
-        print("message.txt not found!")
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT username, message FROM messages')
+    messages = cursor.fetchall()
+    conn.close()
     
-    client_socket.close()
+    return render_template('send_message.html', messages=messages)
+
+@app.route('/get_messages')
+def get_messages():
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+    cursor.execute('SELECT username, message FROM messages')
+    messages = [{'username': row[0], 'message': row[1]} for row in cursor.fetchall()]
+    conn.close()
+    
+    return jsonify(messages=messages)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=12345, debug=True)
