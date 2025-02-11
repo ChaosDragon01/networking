@@ -60,11 +60,7 @@
             border: none;
             border-radius: 5px;
         }
-        input[type="text"]#username {
-            width: 125px; /* Reduced width for username input */
-            background: #2f3136;
-            color: white;
-        }
+        
         input[type="text"]#message {
             flex-grow: 1;
             background: #2f3136;
@@ -107,7 +103,6 @@
         </div>
     </div>
     <form method="POST" action="/send_message">
-        <input type="text" id="username" name="username" placeholder="Enter your username" required>
         <input type="text" id="message" name="message" placeholder="Enter your message" required>
         <button type="submit">Send</button>
     </form>
