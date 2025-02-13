@@ -11,8 +11,9 @@ the user interface is created inthe templates folder and the static folder. Make
 when loading the server there will be multiple given addresses to access the server. However to my tests, Only one of them works
 if you run it test for each address to see which one of your address it works
 
-            # Login: 
-                Logging in without an user-id is impossible 
+ # Logging in: 
+             Logging in without an user-id is impossible. please create a new account which will also be stored locally in the 
+             logindata.csv file. The data.csv file is used for storing access get and post request data's it can help identify which process was called and when including which was the IP address used for it 
 
 
 
