@@ -1,3 +1,5 @@
 logindata.csv
 messages.csv
 data.csv
+
+# All the .gitnored files will be re-created no matter how many times they get deleted or incase they ar empty

@@ -1,20 +1,22 @@
-from flask import Flask, render_template, request, redirect, session, url_for, jsonify
+from flask import Flask, render_template, request, redirect, session, url_for, jsonify, flash
 import os
 import csv
 from datetime import datetime
 import requests
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+UPLOAD_FOLDER = 'static/profile_pics'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Ensure logindata.csv exists
 LOGIN_DATA_FILE = "logindata.csv"
 if not os.path.exists(LOGIN_DATA_FILE):
     with open(LOGIN_DATA_FILE, 'w', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['username', 'password'])
-        writer.writerow(['user1', 'pass1'])  # Example user
-        writer.writerow(['user2', 'pass2'])  # Example user
+        writer.writerow(['username', 'password', 'profile_pic'])
 
 # Ensure data.csv exists
 DATA_FILE = "data.csv"
@@ -26,6 +28,9 @@ if not os.path.exists(DATA_FILE):
 # Test variable to override IP address for testing purposes
 USE_TEST_IP = False
 TEST_IP = '8.8.8.8'  # Google's public DNS IP address
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def log_request(method, endpoint):
     # Use test IP if the test variable is set to True
@@ -73,10 +78,33 @@ def login():
         for row in reader:
             if row[0] == username and row[1] == password:
                 session['username'] = username
+                session['profile_pic'] = row[2]
                 log_request('POST', '/login')
                 return redirect(url_for('send_message'))
     
     return 'Invalid username or password', 401
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        profile_pic = request.files['profile_pic']
+        
+        if profile_pic and allowed_file(profile_pic.filename):
+            filename = secure_filename(profile_pic.filename)
+            profile_pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        else:
+            filename = 'default.png'
+        
+        with open(LOGIN_DATA_FILE, 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([username, password, filename])
+        
+        flash('Account created successfully!', 'success')
+        return redirect(url_for('home'))
+    
+    return render_template('register.html')
 
 @app.route('/send_message', methods=['GET', 'POST'])
 def send_message():
@@ -117,6 +145,7 @@ def get_messages():
 @app.route('/logout')
 def logout():
     username = session.pop('username', None)
+    session.pop('profile_pic', None)
     if username:
         # Remove all messages from the user
         messages = []

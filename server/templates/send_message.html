@@ -3,123 +3,21 @@
 <html>
 <head>
     <title>Send Message</title>
-    <style>
-        body {
-            background: #36393f;
-            font-family: Arial, sans-serif;
-            color: white;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            margin: 0;
-        }
-        .logout {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: #7289da;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-        .logout:hover {
-            background: #5b6eae;
-        }
-        .chat-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-        }
-        .messages {
-            background: #2f3136;
-            padding: 20px;
-            border-radius: 10px;
-            width: 80%;
-            max-width: 800px;
-            margin-bottom: 20px;
-            overflow-y: auto;
-        }
-        .message {
-            background: #40444b;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-        .message strong {
-            color: #7289da;
-            margin-right: 10px;
-        }
-        form {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: #40444b;
-            padding: 20px;
-            border-radius: 10px;
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        input, button {
-            margin: 5px;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-        }
-        input[type="text"]#message {
-            flex-grow: 1;
-            background: #2f3136;
-            color: white;
-        }
-        button {
-            background: #7289da;
-            color: white;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        button:hover {
-            background: #5b6eae;
-        }
-    </style>
-    <script>
-        function fetchMessages() {
-            fetch('/get_messages')
-                .then(response => response.json())
-                .then(data => {
-                    const messagesDiv = document.querySelector('.messages');
-                    messagesDiv.innerHTML = '';
-                    data.messages.forEach(msg => {
-                        const messageDiv = document.createElement('div');
-                        messageDiv.className = 'message';
-                        messageDiv.innerHTML = `<strong>${msg.username}:</strong> ${msg.message}`;
-                        messagesDiv.appendChild(messageDiv);
-                    });
-                });
-        }
-
-        setInterval(fetchMessages, 5000); // Refresh messages every 5 seconds
-        window.onload = fetchMessages; // Fetch messages on page load
-    </script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/send_message.css') }}">
 </head>
 <body>
     <a href="/logout" class="logout">Logout</a>
-    <div class="chat-container">
-        <div class="messages">
-            <!-- Messages will be dynamically loaded here -->
-        </div>
-    </div>
+    <img src="{{ url_for('static', filename='profile_pics/' + session['profile_pic']) }}" alt="Profile Picture" class="profile-pic">
     <form method="POST" action="/send_message">
         <input type="text" id="message" name="message" placeholder="Enter your message" required>
         <button type="submit">Send</button>
     </form>
+    <div class="messages">
+        <h2>Messages:</h2>
+        {% for username, message in messages %}
+            <div class="message"><strong>{{ username }}:</strong> {{ message }}</div>
+        {% endfor %}
+    </div>
+    <script src="{{ url_for('static', filename='scripts/send_message.js') }}"></script>
 </body>
 </html>
