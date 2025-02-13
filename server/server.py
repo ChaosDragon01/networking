@@ -23,8 +23,17 @@ if not os.path.exists(DATA_FILE):
         writer = csv.writer(f)
         writer.writerow(['request_time', 'request_method', 'ip_address', 'city', 'state', 'country', 'zip', 'local_time'])
 
+# Test variable to override IP address for testing purposes
+USE_TEST_IP = False
+TEST_IP = '8.8.8.8'  # Google's public DNS IP address
+
 def log_request(method, endpoint):
-    ip = request.remote_addr
+    # Use test IP if the test variable is set to True
+    if USE_TEST_IP:
+        ip = TEST_IP
+    else:
+        ip = request.remote_addr
+    
     try:
         response = requests.get(f'http://ipinfo.io/{ip}/json')
         data = response.json()
