@@ -6,26 +6,26 @@ import requests
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = 'secretkey' # anything goes here honestly since it's a local server anyway
 UPLOAD_FOLDER = 'static/profile_pics'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-# Ensure logindata.csv exists
+# This ensures logindata.csv exists
 LOGIN_DATA_FILE = "logindata.csv"
 if not os.path.exists(LOGIN_DATA_FILE):
     with open(LOGIN_DATA_FILE, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['username', 'password', 'profile_pic'])
 
-# Ensure data.csv exists
+# This ensures data.csv exists
 DATA_FILE = "data.csv"
 if not os.path.exists(DATA_FILE):
     with open(DATA_FILE, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(['request_time', 'request_method', 'ip_address', 'city', 'state', 'country', 'zip', 'local_time'])
 
-# Test variable to override IP address for testing purposes
+# Test variable to override IP address for testing purposes. Because ipinfo.io has a limit on requests. plus it's a local server anyway
 USE_TEST_IP = False
 TEST_IP = '8.8.8.8'  # Google's public DNS IP address
 
@@ -33,7 +33,7 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def log_request(method, endpoint):
-    # Use test IP if the test variable is set to True
+    # Use test IP if the test variable is set to True. This was used for if the ipinfo.io API is working.
     if USE_TEST_IP:
         ip = TEST_IP
     else:

@@ -2,12 +2,6 @@
 
 # Computer Networking assignments and projects
 
+# each folder it it's own project. databases won't be given they need to be created. most of the projects have the 
 
-# Python Libraries used: 
-            # Server 
-                # Flask
-                    pip install flask
-
-
-# the folder positionings should be the way they are right now. If not the new folders will be made
-
+# all the information about each projects and assignments are stored in their respect doc.md files of their folders 
