@@ -13,6 +13,21 @@
             flex-direction: column;
             margin: 0;
         }
+        .logout {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #7289da;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        .logout:hover {
+            background: #5b6eae;
+        }
         .chat-container {
             display: flex;
             flex-direction: column;
@@ -60,7 +75,6 @@
             border: none;
             border-radius: 5px;
         }
-        
         input[type="text"]#message {
             flex-grow: 1;
             background: #2f3136;
@@ -97,6 +111,7 @@
     </script>
 </head>
 <body>
+    <a href="/logout" class="logout">Logout</a>
     <div class="chat-container">
         <div class="messages">
             <!-- Messages will be dynamically loaded here -->

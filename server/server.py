@@ -5,13 +5,6 @@ import csv
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Ensure message file exists
-MESSAGE_FILE = "messages.csv"
-if not os.path.exists(MESSAGE_FILE):
-    with open(MESSAGE_FILE, 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(['username', 'message'])
-
 # Ensure logindata.csv exists
 LOGIN_DATA_FILE = "logindata.csv"
 if not os.path.exists(LOGIN_DATA_FILE):
@@ -50,14 +43,14 @@ def send_message():
     if request.method == 'POST':
         username = session['username']
         message = request.form['message']
-        with open(MESSAGE_FILE, 'a', newline='') as f:
+        with open('messages.csv', 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow([username, message])
         return redirect(url_for('send_message'))
     
     messages = []
-    if os.path.exists(MESSAGE_FILE):
-        with open(MESSAGE_FILE, 'r') as f:
+    if os.path.exists('messages.csv'):
+        with open('messages.csv', 'r') as f:
             reader = csv.reader(f)
             next(reader)  # Skip header row
             messages = list(reader)
@@ -67,8 +60,8 @@ def send_message():
 @app.route('/get_messages')
 def get_messages():
     messages = []
-    if os.path.exists(MESSAGE_FILE):
-        with open(MESSAGE_FILE, 'r') as f:
+    if os.path.exists('messages.csv'):
+        with open('messages.csv', 'r') as f:
             reader = csv.reader(f)
             next(reader)  # Skip header row
             messages = [{'username': row[0], 'message': row[1]} for row in reader]
