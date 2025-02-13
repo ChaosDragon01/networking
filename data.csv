@@ -1,7 +1,0 @@
-method,endpoint
-GET,/send_message
-POST,/send_message
-GET,/send_message
-GET,/send_message
-POST,/send_message
-GET,/send_message

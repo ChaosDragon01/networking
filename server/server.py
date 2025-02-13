@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request, redirect, session, url_for, jsonify
 import os
 import csv
+from datetime import datetime
+import requests
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -13,6 +15,37 @@ if not os.path.exists(LOGIN_DATA_FILE):
         writer.writerow(['username', 'password'])
         writer.writerow(['user1', 'pass1'])  # Example user
         writer.writerow(['user2', 'pass2'])  # Example user
+
+# Ensure data.csv exists
+DATA_FILE = "data.csv"
+if not os.path.exists(DATA_FILE):
+    with open(DATA_FILE, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(['request_time', 'request_method', 'ip_address', 'city', 'state', 'country', 'zip', 'local_time'])
+
+def log_request(method, endpoint):
+    ip = request.remote_addr
+    try:
+        response = requests.get(f'http://ipinfo.io/{ip}/json')
+        data = response.json()
+        city = data.get('city', 'Unknown')
+        state = data.get('region', 'Unknown')
+        country = data.get('country', 'Unknown')
+        zip_code = data.get('postal', 'Unknown')
+        local_time = data.get('timezone', 'Unknown')
+    except Exception as e:
+        city = 'Unknown'
+        state = 'Unknown'
+        country = 'Unknown'
+        zip_code = 'Unknown'
+        local_time = 'Unknown'
+        print(f"Error fetching data from ipinfo.io: {e}")
+    
+    request_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    
+    with open(DATA_FILE, 'a', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow([request_time, method, ip, city, state, country, zip_code, local_time])
 
 @app.route('/')
 def home():
@@ -31,6 +64,7 @@ def login():
         for row in reader:
             if row[0] == username and row[1] == password:
                 session['username'] = username
+                log_request('POST', '/login')
                 return redirect(url_for('send_message'))
     
     return 'Invalid username or password', 401
@@ -46,6 +80,7 @@ def send_message():
         with open('messages.csv', 'a', newline='') as f:
             writer = csv.writer(f)
             writer.writerow([username, message])
+        log_request('POST', '/send_message')
         return redirect(url_for('send_message'))
     
     messages = []
@@ -55,6 +90,7 @@ def send_message():
             next(reader)  # Skip header row
             messages = list(reader)
     
+    log_request('GET', '/send_message')
     return render_template('send_message.html', messages=messages)
 
 @app.route('/get_messages')
@@ -65,11 +101,29 @@ def get_messages():
             reader = csv.reader(f)
             next(reader)  # Skip header row
             messages = [{'username': row[0], 'message': row[1]} for row in reader]
+    
+    log_request('GET', '/get_messages')
     return jsonify(messages=messages)
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
+    username = session.pop('username', None)
+    if username:
+        # Remove all messages from the user
+        messages = []
+        if os.path.exists('messages.csv'):
+            with open('messages.csv', 'r') as f:
+                reader = csv.reader(f)
+                next(reader)  # Skip header row
+                messages = [row for row in reader if row[0] != username]
+        
+        with open('messages.csv', 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['username', 'message'])
+            writer.writerows(messages)
+        
+        log_request('GET', '/logout')
+    
     return redirect(url_for('home'))
 
 if __name__ == '__main__':
