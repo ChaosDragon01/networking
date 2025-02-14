@@ -26,7 +26,7 @@ if not os.path.exists(DATA_FILE):
         writer.writerow(['request_time', 'request_method', 'ip_address', 'city', 'state', 'country', 'zip', 'local_time'])
 
 # Test variable to override IP address for testing purposes. Because ipinfo.io has a limit on requests. plus it's a local server anyway
-USE_TEST_IP = False
+USE_TEST_IP = True
 TEST_IP = '8.8.8.8'  # Google's public DNS IP address
 
 def allowed_file(filename):
