@@ -95,7 +95,7 @@ def register():
             filename = secure_filename(profile_pic.filename)
             profile_pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         else:
-            filename = 'default.png'
+            filename = 'profilepic.jpg'
         
         with open(LOGIN_DATA_FILE, 'a', newline='') as f:
             writer = csv.writer(f)
